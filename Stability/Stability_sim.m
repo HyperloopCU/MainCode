@@ -72,22 +72,4 @@ Vpodmax_flat=sqrt(9.81*(width/2)*Rmin/Cmh)/mph2mps; %mph max speed of pod withou
 % figure
 % plot(A_track(1,:),A_track(2,:))
 % axis equal
-%% Propulsion
-m=150 %kg
-div=1000;
-Wheel_rad=(0:(1000)/div:1000);
-Gear_rat=(1:9/div:10);
-a=2.4*9.81; %m/s
 
-for(i=1:1:div+1)
-    for (n=1:1:div+1)
-torque(i,n)=m*a*(Wheel_rad(n)/1000)/Gear_rat(i);
-t_268_max(i,n)=500;
-    end
-end
-mesh(Wheel_rad,Gear_rat,torque)
-hold on
-surf(Wheel_rad,Gear_rat,t_268_max)
-xlabel("wheel rad");
-ylabel('gear ratio');
-zlabel('minimum torque required');
