@@ -144,7 +144,7 @@ mi_clearselected;
 % Draw Magnets
 
 nx = 12;
-ny = 4;
+ny = 8;
 cntr = 0;
 for k = 1:nx
   xl = 2*(k - 1)*pp/nx;
