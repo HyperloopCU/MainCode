@@ -213,7 +213,7 @@ mi_saveas('temp.fem');
 
 n=floor(2*vopt1d);
 data=zeros(n+1,1);
-x=0:n;
+x=(0:n)';
 for v = 0:n
   mi_probdef(B*v/Hz, 'meters', 'planar', 10^(-8), heff, 30);
   mi_analyze;
@@ -224,7 +224,7 @@ end
 
 %closefemm; %uncomment to close window after script runs
 
-plot(x,data);
+fitModel;
 xlabel('Shuttle Velocity, m/s');
 ylabel('Braking Force, N');
 title('Braking Force vs Velocity');
