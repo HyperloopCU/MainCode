@@ -158,12 +158,13 @@ end
 
 % Draw Backiron
 
-mi_drawrectangle(0, tp + g + tm, 2*pp, tp + g + tm + tb);
-mi_addblocklabel(pp, tp + g + tm + tb/2);
-mi_selectlabel(pp, tp + g + tm + tb/2);
-mi_setblockprop('Steel', 1, 0, '<None>', 0, 0, 1);
-mi_clearselected;
-
+if backiron
+    mi_drawrectangle(0, tp + g + tm, 2*pp, tp + g + tm + tb);
+    mi_addblocklabel(pp, tp + g + tm + tb/2);
+    mi_selectlabel(pp, tp + g + tm + tb/2);
+    mi_setblockprop('Steel', 1, 0, '<None>', 0, 0, 1);
+    mi_clearselected;
+end
 % Add Boundary Conditions
 
 mi_addboundprop('A=0', 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -222,11 +223,4 @@ for v = 0:n
   data(v+1) = mo_blockintegral(11)
 end
 
-%closefemm; %uncomment to close window after script runs
-
-fitModel;
-xlabel('Shuttle Velocity, m/s');
-ylabel('Braking Force, N');
-title('Braking Force vs Velocity');
-grid on;
-
+closefemm; %uncomment to close window after script runs
