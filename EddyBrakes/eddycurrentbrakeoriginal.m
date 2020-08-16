@@ -18,7 +18,7 @@ Pi = pi;  %pi :)
 I = 1j;
 muo = 4.*Pi*10^(-7);  %permeability constant in henries
 Hz = 2*Pi;   %some reason freqeuncy is multiples of 2pi
- 
+
 %% Problem Parameters
  %here is where we input the data
 % A conductive plate moves within a double-sided array of steel-backed
@@ -32,7 +32,6 @@ wm = 20*mm;         % Magnet width
 tm = 5*mm;          % Magnet thickness 
 tb  = 5*mm;         % Back iron thickness 
 tp = 2.5*mm;        % Conductive plate half-thickness  (1/2 the thickness of aluminum)
-g = 1*mm;           % Air gap length between magnet and plate 
 sigma = 30;         % Plate conductivity in MS/m (megasiemens per meter, for 6061 t6 al its 24.59 MS/m)
 h = 100*mm;         % Depth of magnet array 
 epsilon = 20*mm;    % Plate overhang on either side of the magnets 
@@ -143,10 +142,9 @@ mi_clearselected;
 
 % Draw Magnets
 
-n = 30;
-for k = 1:n
-  xl = 2*(k - 1)*pp/n;
-  xr = 2*k*pp/n;
+for k = 1:divisions
+  xl = 2*(k - 1)*pp/divisions;
+  xr = 2*k*pp/divisions;
   xm = (xl + xr)/2;
   mi_addmaterial(['J',num2str(k)], 1, 1, 0, (Jmag/MA)*exp(I*B*xm), 0 , 0, 0, 1, 0, 0, 0, 1, 1);
   mi_drawrectangle(xl, tp + g + tm, xr, tp + g);
@@ -158,13 +156,16 @@ end
 
 % Draw Backiron
 
+mi_drawrectangle(0, tp + g + tm, 2*pp, tp + g + tm + tb);
+mi_addblocklabel(pp, tp + g + tm + tb/2);
+mi_selectlabel(pp, tp + g + tm + tb/2);
 if backiron
-    mi_drawrectangle(0, tp + g + tm, 2*pp, tp + g + tm + tb);
-    mi_addblocklabel(pp, tp + g + tm + tb/2);
-    mi_selectlabel(pp, tp + g + tm + tb/2);
     mi_setblockprop('Steel', 1, 0, '<None>', 0, 0, 1);
-    mi_clearselected;
+else
+    mi_setblockprop('Air', 1, 0, '<None>', 0, 0, 1);
 end
+mi_clearselected;
+
 % Add Boundary Conditions
 
 mi_addboundprop('A=0', 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -201,26 +202,29 @@ mi_zoomnatural;
 
 %% Calculate Force vs Speed
 
-% Expected speed at which maximum braking force occurs in m/s, 
-% based on 1D linear induction motor theory:
+% Update tests counter (declared in testModel)
+tests = tests + 1;
 
-wc = (B^2 * gtot)/((sigmaEff*MA/m)*muo*tp);
-vopt1d = wc/B;
+% % Expected speed at which maximum braking force occurs in m/s, 
+% % based on 1D linear induction motor theory:
+% 
+% wc = (B^2 * gtot)/((sigmaEff*MA/m)*muo*tp);
+% vopt1d = wc/B;
 
 % We can use the quick analytical estimate of vopt to select 
 % the range over which we evaluate the performance of the brake.
 
 mi_saveas('temp.fem');
 
-n=floor(2*vopt1d);
-data=zeros(n+1,1);
-x=(0:n)';
-for v = 0:n
+% n=floor(2*vopt1d);
+lastData=zeros(numSims+1,1);
+x=(0:numSims)';
+for v = 0:numSims
   mi_probdef(B*v/Hz, 'meters', 'planar', 10^(-8), heff, 30);
   mi_analyze;
   mi_loadsolution;
   mo_groupselectblock(1);
-  data(v+1) = mo_blockintegral(11)
+  lastData(v+1) = mo_blockintegral(11)
 end
 
 closefemm; %uncomment to close window after script runs
