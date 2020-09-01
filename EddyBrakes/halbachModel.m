@@ -1,7 +1,6 @@
 %% Global Variables 
-numPoles = 8;
-steps = numPoles*4;
-ytop=pp*numPoles/steps;
+numPoles = 5;
+ytop=pp;
 Jmag = 4*Hc*sin(wm*B/2)/pp;
 
 %% Original Model
@@ -10,6 +9,7 @@ openfemm;
 newdocument(0);
 mi_getmaterial('Air');
 
+steps=numPoles*4
 
 for kk = 1:steps
   xl = numPoles*(kk - 1)*pp/steps;
@@ -26,6 +26,9 @@ end
 mi_zoomnatural;
 
 drawBoundRect(pp, numPoles, ytop, 3);
+setBoundConds(pp, numPoles, ytop);
+
+
 mi_saveas('original.fem');
 getSolution();
 %% Permanent Magnet Halbach Model
@@ -37,14 +40,14 @@ mi_getmaterial('N42');
 %Draw magnets
 angle = 0;
 
-for kk = 1:steps
-  xl = numPoles*(kk - 1)*pp/steps;
-  xr = numPoles*kk*pp/steps;
+for kk = 1:numPoles
+  xl = (kk - 1)*pp;
+  xr = kk*pp;
   xm = (xl + xr)/2;
   mi_drawrectangle(xl, 0, xr, ytop);
   mi_addblocklabel(xm, ytop/2);
   mi_selectlabel(xm, ytop/2);
-  angle = angle - numPoles*360/steps;
+  angle = angle - 90;
   mi_setblockprop('N42', 1, 0, '<None>', angle, 1, 1);
   mi_clearselected;
 end
@@ -52,8 +55,45 @@ end
 mi_zoomnatural;
 
 drawBoundRect(pp, numPoles, ytop, 3);
+% setBoundConds(pp, numPoles, ytop);
+
 mi_saveas('pm_halbach.fem');
 getSolution();
+
+%% Backiron alternating array model
+
+newdocument(0);
+mi_getmaterial('Air');
+mi_addmaterial('Steel', 5000, 5000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1);
+
+steps=numPoles*4
+
+for kk = 1:steps
+  xl = numPoles*(kk - 1)*pp/steps;
+  xr = numPoles*kk*pp/steps;
+  xm = (xl + xr)/2;
+  mi_addmaterial(['J',num2str(kk)], 1, 1, 0, (Jmag/MA)*exp(I*B*xm), 0 , 0, 0, 1, 0, 0, 0, 1, 1);
+  mi_drawrectangle(xl, 0, xr, ytop);
+  mi_addblocklabel(xm, ytop/2);
+  mi_selectlabel(xm, ytop/2);
+  mi_setblockprop(['J',num2str(kk)], 1, 0, '<None>', 0, 0, 1);
+  mi_clearselected;
+end
+
+%Draw backiron
+mi_drawrectangle(0, ytop, numPoles*pp, ytop*2);
+mi_addblocklabel(numPoles*pp/2, ytop*3/2);
+mi_selectlabel(numPoles*pp/2, ytop*3/2); 
+mi_setblockprop('Steel', 1, 0, '<None>', 0, 0, 1);
+mi_clearselected;
+
+mi_zoomnatural;
+
+drawBoundRect(pp, numPoles, ytop, 3);
+
+mi_saveas('backiron.fem');
+getSolution();
+
 %% Current Sheet Halbach Model 
 openfemm;
 newdocument(0);
@@ -85,9 +125,24 @@ end
 mi_zoomnatural;
 
 drawBoundRect(pp, numPoles, ytop, 3);
+setBoundConds(pp, numPoles, ytop);
+
 mi_saveas('cs_halbach.fem');
 getSolution();
 %% Function Definitions
+
+mi_addboundprop('Normal', 0, 0, 0, 0, 0, 0, 0, 0, 2);
+mi_addboundprop('A=0', 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+function setBoundConds(pp, numPoles, ytop)
+    mi_selectsegment(0, 0);
+    mi_selectsegment(0, ytop);
+    mi_selectsegment(numPoles*pp, 0);
+    mi_selectsegment(numPoles*pp, ytop);
+    mi_setsegmentprop('Normal', 0, 1, 0, 0);  
+    mi_clearselected;
+end
+
 
 function drawBoundCirc(pp, numPoles, ytop)
     farLeft = -2*pp*numPoles;
@@ -110,8 +165,8 @@ end
 function drawBoundRect(pp, numPoles, ytop, scale)
     %scale argument is how many pole pitches to add to each dimension
     mi_drawrectangle(-pp*scale, -pp*scale, pp*(numPoles+scale), ytop+(pp*scale));
-    mi_addblocklabel(pp*(numPoles+scale)/2, (ytop+pp*scale)/2);
-    mi_selectlabel(pp*(numPoles+scale)/2, (ytop+pp*scale)/2);
+    mi_addblocklabel(pp*(numPoles+scale-1), ytop+pp*(scale-1));
+    mi_selectlabel(pp*(numPoles+scale-1), ytop+pp*(scale-1));
     mi_setblockprop('Air', 1, 0, '<None>', 0, 0, 0);
     mi_clearselected;
 end
@@ -121,3 +176,4 @@ function getSolution()
     mi_analyze;
     mi_loadsolution;
 end
+

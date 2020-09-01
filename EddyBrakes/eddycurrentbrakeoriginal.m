@@ -26,13 +26,18 @@ Hz = 2*Pi;   %some reason freqeuncy is multiples of 2pi
 % plate velocity.
 % Refer to http://www.femm.info/wiki/EddyCurrentBrake for a figure
 
-BHmax = 40;         % Energy product of the magnet  in MGOe ???
-pp = 25*mm;         % Pole pitch of the magnets  ???
+BHmax = 42;         % Energy product of the magnet  in MGOe ???
+wm = 12.7*mm;         % Magnet width (width parallel to rail for mit was 1/2")
+tm = 6.35*mm;          % Magnet thickness (for mit was 1/4")
+h = 50.8*mm;         % Depth of magnet array (how far out of the plane the magnets go (perpen to rail)(mit was 1.5")
+gm = 1.85;            % gap between magnets on the brake rail piece uses to optimize force
+pp = (wm/mm + 2*gm)*mm;         % Pole pitch of the magnets (dist bw magentic poles (magent width + an air gap))
+
 wm = 20*mm;         % Magnet width 
 tm = 5*mm;          % Magnet thickness 
 tb  = 5*mm;         % Back iron thickness 
 tp = 2.5*mm;        % Conductive plate half-thickness  (1/2 the thickness of aluminum)
-sigma = 30;         % Plate conductivity in MS/m (megasiemens per meter, for 6061 t6 al its 24.59 MS/m)
+sigma = 24.59;      % Plate conductivity in MS/m (megasiemens per meter, for 6061 t6 al its 24.59 MS/m)  
 h = 100*mm;         % Depth of magnet array 
 epsilon = 20*mm;    % Plate overhang on either side of the magnets 
 
@@ -205,26 +210,17 @@ mi_zoomnatural;
 % Update tests counter (declared in testModel)
 tests = tests + 1;
 
-% % Expected speed at which maximum braking force occurs in m/s, 
-% % based on 1D linear induction motor theory:
-% 
-% wc = (B^2 * gtot)/((sigmaEff*MA/m)*muo*tp);
-% vopt1d = wc/B;
-
-% We can use the quick analytical estimate of vopt to select 
-% the range over which we evaluate the performance of the brake.
-
 mi_saveas('temp.fem');
 
-% n=floor(2*vopt1d);
-lastData=zeros(numSims+1,1);
-x=(0:numSims)';
-for v = 0:numSims
+
+lastData=zeros((maxSpeed/stepSize)+1,1);
+x=(0:stepSize:maxSpeed)';
+for v = 0:stepSize:maxSpeed
   mi_probdef(B*v/Hz, 'meters', 'planar', 10^(-8), heff, 30);
   mi_analyze;
   mi_loadsolution;
   mo_groupselectblock(1);
-  lastData(v+1) = mo_blockintegral(11)
+  lastData((v/stepSize)+1) = mo_blockintegral(11);
 end
 
 closefemm; %uncomment to close window after script runs

@@ -8,7 +8,7 @@
 figure;
 % fits = fittype.empty([0 tests])
 hold on;
-colors=['r','b','g','y','c'];
+colors=['r','b','g','m','c'];
 % colors=[0, 0.4470, 0.7410 ; 0.8500, 0.3250, 0.0980]
 for ii = 1:tests
     curData = data(:,ii);
