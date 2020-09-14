@@ -8,7 +8,7 @@ Jmag = 4*Hc*sin(wm*B/2)/pp;
 openfemm;
 newdocument(0);
 mi_getmaterial('Air');
-
+    
 steps=numPoles*4
 
 for kk = 1:steps
