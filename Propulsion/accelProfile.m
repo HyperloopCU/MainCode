@@ -1,4 +1,4 @@
-%Set parameters (CURRENTLY NOT USED)
+    %Set parameters (CURRENTLY NOT USED)
 
 t = linspace(0, 10, 1000); %Time
 maxA = 1; %Maximum allowed acceleration (human limit)
@@ -15,7 +15,16 @@ brakeDist = 1; %length of brake stage
 acc_profile(5, 5, 20, 100);
 %% fn defs
 
-function [t, acc] = acc_profile(max_a, rampup, rampdown, topspeed)
+function [t, acc, speed, power] = acc_profile(max_a, rampup, rampdown, topspeed)
+    %Function to calculate acceleration, speed and power curves given a max
+    %acceleration, rampup time (when acceleration rises to a_max), rampdown time
+    %(when acceleration drops to 0), and a top speed to be reached.
+    %The time that the max acceleration is held is calculated based on the
+    %top speed
+    %These curves are only for the lift off phase and do not include
+    %braking (braking is a different system than propulsion and it might have different
+    %parameters).
+    %
     %a in m/s^2
     %rampup, rampdown in s
     %topspeed in m/s. 200mph = 90 m/s
@@ -35,31 +44,34 @@ function [t, acc] = acc_profile(max_a, rampup, rampdown, topspeed)
     acc(rampdown_ind) = max_a-max_a*(t(rampdown_ind)-holdtime-rampup)/rampdown;
     
     %Calculate speed vector with numeric integration
-    speed = cumsum(acc)*duration/1000; 
+    speed = cumsum(acc)*(t(2)-t(1)); 
     
     %Calculate power in kW (mass of 100 kg assumed)
     mass = 100;
     power = mass*acc.*speed/1000;
-
+    maxpower = max(power);
+    
     figure;
-    subplot(1,3,1);
+    subplot(3,1,1);
     plot(t, acc);
     ylim([0, 1.5*max_a]);
     xlabel('Time (s)');
     ylabel('Acc. (m/s^2)');
     title('Acceleration');
     
-    subplot(1,3,2);
+    subplot(3,1,2);
     plot(t, speed);
     xlabel('Time (s)');
     ylabel('Speed (m/s)');
     title('Speed');
+    ylim([0 1.5*topspeed]);
     
-    subplot(1, 3, 3);
+    subplot(3,1,3);
     plot(t, power);
     xlabel('Time (s)');
     ylabel('Power (kW)');
     title('Power');
+    ylim([0 1.5*maxpower]);
     
-    sgtitle(['Max. Acc = ', int2str(max_a), ' m/s^2, Top Speed = ', int2str(topspeed), ' m/s, Peak Power = ', int2str(max(power)), ' kW.'])
+    sgtitle(['Max. Acc = ', int2str(max_a), ' m/s^2, Top Speed = ', int2str(topspeed), ' m/s, Peak Power = ', int2str(maxpower), ' kW.'])
 end
