@@ -19,11 +19,38 @@ motor = struct('name','EMRAX-268','motorD',268,'peakT',500);
 
 findSpecs(motor,m,a);
 
-%function to determine allowed wheel sizes & gear ratios based on motor
-%and acceleration/mass estimates
-%result is a 2-row vector. Columns are pairs of gear ratio/wheel size
-%(respectively) that yield max allowed torque
+%%
+clc;
+wheeldia = 0.3; %About a 16 in wheel dia
+gear = 1;
+max_a = 5;
+
+torque = findtorque(200,max_a,wheeldia,gear)
+rpm = findrpm(100,wheeldia,gear)
+%% Fn defs
+
+function torque = findtorque(mass,max_a,wheeld,gear)
+    %Fn to calculate max torque requirements on motor based on pod mass, maximum
+    %acceleration, wheel dia and gear ratio (SI units
+    %gear ratio is defined as (rpm load)/(rpm motor)
+    %returns value in N*m (Newton-meters)
+    %torque contribution of moment of inertia of wheels is assumed negligible
+    torque = (wheeld/2)*mass*max_a*gear;
+end
+
+function rpm = findrpm(max_s,wheeld,gear)
+    %Fn to calculate motor rpm
+    %all arguments in SI units
+    %gear ratio is again (rpm load)/(rpm motor)
+    
+    rpm = 60*max_s/(pi*wheeld*gear);
+end
+
 function allowed = findSpecs(motor,mass,acc)
+    %function to determine allowed wheel sizes & gear ratios based on motor
+    %and acceleration/mass estimates
+    %result is a 2-row vector. Columns are pairs of gear ratio/wheel size
+    %(respectively) that yield max allowed torque
     %motor specs
     name = motor.name;
     minDia = motor.motorD;
