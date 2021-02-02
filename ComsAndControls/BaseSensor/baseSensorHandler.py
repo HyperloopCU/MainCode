@@ -1,28 +1,34 @@
 from enum import Enum
-from threading import Thread
+from sched import scheduler
+from time import time,sleep
+from random import randint
 
 class ReadingType(Enum):
     INTERUPT = 0
     ANALOG = 1
-    PRUINTERRUPT = 3
-    PRUANALOG = 4
+    PRUINTERRUPT = 2
+    PRUANALOG = 3
+    SIMULATE = 4
 
 
-class BaseSensorHandler(Thread): 
-    def __init__(self,threadID, threadName,GPIO_PIN, reading_type,simulate=False):
-        Thread.__init__(self)
-        self.threadID = threadID
-        self.threadName = threadName
+class BaseSensorHandler(): 
+    def __init__(self,GPIO_PIN, reading_type,callback,simulateRange=[0,1]):
         # check reading type is valid 
-        if reading_type > 4 or reading_type < 0:
+        if not isinstance(reading_type,type(ReadingType.SIMULATE)):
             raise ValueError("Invalid reading type")
         self.reading_type = reading_type
-        if not isinstance(simulate,bool):
-            raise ValueError("Invalid simulating type")
-        self.simulate = simulate
+        self.simulateRange = simulateRange
+        self.callback = callback
+        self.cont = True 
+        self.run()
         
     def run(self):
-        if self.reading_type == ReadingType.INTERUPT:
+        if self.reading_type == ReadingType.SIMULATE:
+            self.s = scheduler(time,sleep)
+            self.simulateTimer = .1
+            self.simulatePriority = 1
+            self.timerCreater()
+        elif self.reading_type == ReadingType.INTERUPT:
             self.interruptReader()
         elif self.reading_type == ReadingType.ANALOG:
             self.analogReader()
@@ -34,11 +40,28 @@ class BaseSensorHandler(Thread):
             raise ValueError("Invalid reading type")
         
     def interruptReader(self):
-        pass 
+        raise NotImplementedError 
+    
+
     def analogReader(self):
-        pass
+        raise NotImplementedError 
+
 
     def PRUInterruptReader(self):
-        pass
+        raise NotImplementedError 
+
+
     def PRUAnalogReader(self):
-        pass
+        raise NotImplementedError 
+
+    
+    def simulate(self):
+        rand = randint(self.simulateRange[0],self.simulateRange[1])  # Maybe I should add 2 decimal places or someting but it will prob just be 0,255 
+        self.callback(rand,self)
+        self.timerCreater()
+
+
+    def timerCreater(self):
+        if self.cont:
+            self.s.enter(self.simulateTimer,self.simulatePriority,self.simulate)
+            self.s.run() 
