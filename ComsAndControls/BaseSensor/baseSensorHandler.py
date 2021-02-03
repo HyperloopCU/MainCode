@@ -2,6 +2,7 @@ from enum import Enum
 from sched import scheduler
 from time import time,sleep
 from random import randint
+from Adafruit_BBIO import GPIO
 
 class ReadingType(Enum):
     INTERUPT = 0
@@ -20,6 +21,8 @@ class BaseSensorHandler():
         self.simulateRange = simulateRange
         self.callback = callback
         self.cont = True 
+        self.GPIO_PIN = GPIO_PIN
+        GPIO.setup(self.GPIO_PIN,GPIO.IN)
         self.run()
         
     def run(self):
@@ -29,6 +32,7 @@ class BaseSensorHandler():
             self.simulatePriority = 1
             self.timerCreater()
         elif self.reading_type == ReadingType.INTERUPT:
+            
             self.interruptReader()
         elif self.reading_type == ReadingType.ANALOG:
             self.analogReader()
@@ -40,8 +44,13 @@ class BaseSensorHandler():
             raise ValueError("Invalid reading type")
         
     def interruptReader(self):
-        raise NotImplementedError 
-    
+        GPIO.add_event_detect(self.GPIO_PIN, GPIO.RISING)
+        def recursive_reader(self):
+            if self.cont:
+                if GPIO.event_detected: 
+                    self.callback(True,self)
+                    recursive_reader(self)
+        recursive_reader(self)
 
     def analogReader(self):
         raise NotImplementedError 

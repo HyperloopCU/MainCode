@@ -10,7 +10,7 @@ def callback(data,sh):
         sh.cont = False 
 
 
-sh = BaseSensorHandler(5,ReadingType.SIMULATE,callback)
+sh = BaseSensorHandler("P1_35",ReadingType.SIMULATE,callback)
 
 
 
