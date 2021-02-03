@@ -2,7 +2,7 @@ from enum import Enum
 from sched import scheduler
 from time import time,sleep
 from random import randint
-from Adafruit_BBIO import GPIO
+from Adafruit_BBIO import GPIO,ADC
 
 class ReadingType(Enum):
     INTERUPT = 0
@@ -13,8 +13,19 @@ class ReadingType(Enum):
 
 
 class BaseSensorHandler(): 
+    '''
+
+        Constructs a new Sensor Handler Object 
+
+    '''
     def __init__(self,GPIO_PIN, reading_type,callback,simulateRange=[0,1]):
-        # check reading type is valid 
+        '''
+        :param GPIO_PIN: string value corresponding to the pin P(PINHEADER)_(PINNUMBER) ex pin header 1 with pin number 36 P1_36
+        :param reading_type: ReadingType Enum corresponding to the type of reading the user wants to take (package in the same file)
+        :param callback: function to be called with the data the function takes 2 parameters the data value and this object
+        :param simulateRange: optional parameter array with 2 elements the first being the lower bound and the second being the upper bound to simulate ranges from
+        :return: the object
+        '''
         if not isinstance(reading_type,type(ReadingType.SIMULATE)):
             raise ValueError("Invalid reading type")
         self.reading_type = reading_type
@@ -32,9 +43,9 @@ class BaseSensorHandler():
             self.simulatePriority = 1
             self.timerCreater()
         elif self.reading_type == ReadingType.INTERUPT:
-            
             self.interruptReader()
         elif self.reading_type == ReadingType.ANALOG:
+            ADC.setup()
             self.analogReader()
         elif self.reading_type == ReadingType.PRUINTERRUPT:
             self.PRUInterruptReader()
@@ -44,16 +55,15 @@ class BaseSensorHandler():
             raise ValueError("Invalid reading type")
         
     def interruptReader(self):
-        GPIO.add_event_detect(self.GPIO_PIN, GPIO.RISING)
-        def recursive_reader(self):
-            if self.cont:
-                if GPIO.event_detected: 
-                    self.callback(True,self)
-                    recursive_reader(self)
-        recursive_reader(self)
+        GPIO.wait_for_edge(self.GPIO_PIN, GPIO.RISING)
+        self.callback(True,self)
+        self.interruptReader()
+        
 
     def analogReader(self):
-        raise NotImplementedError 
+        while self.cont:
+            data = ADC.read(self.GPIO_PIN)
+            self.callback(data,self)
 
 
     def PRUInterruptReader(self):
