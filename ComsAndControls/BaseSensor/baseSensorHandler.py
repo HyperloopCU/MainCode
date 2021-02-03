@@ -55,9 +55,10 @@ class BaseSensorHandler():
             raise ValueError("Invalid reading type")
         
     def interruptReader(self):
-        GPIO.wait_for_edge(self.GPIO_PIN, GPIO.RISING)
-        self.callback(True,self)
-        self.interruptReader()
+        if self.cont:
+            GPIO.wait_for_edge(self.GPIO_PIN, GPIO.RISING)
+            self.callback(True,self)
+            self.interruptReader()
         
 
     def analogReader(self):
