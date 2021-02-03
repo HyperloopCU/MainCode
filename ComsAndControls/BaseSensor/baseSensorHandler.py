@@ -35,6 +35,10 @@ class BaseSensorHandler():
         self.GPIO_PIN = GPIO_PIN
         GPIO.setup(self.GPIO_PIN,GPIO.IN)
         self.run()
+    
+
+    def turnOfCont(self):
+        self.cont = False
         
     def run(self):
         if self.reading_type == ReadingType.SIMULATE:
@@ -85,3 +89,5 @@ class BaseSensorHandler():
         if self.cont:
             self.s.enter(self.simulateTimer,self.simulatePriority,self.simulate)
             self.s.run() 
+    
+    
