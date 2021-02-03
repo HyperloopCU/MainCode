@@ -10,7 +10,7 @@ def callback1(data,sh):
         print("{} data from {}".format(data,sh.GPIO_PIN))
         count1+=1
         if count1 >= 20:
-            sh.cont = False 
+            sh.turnOff() 
 
 count2 = 0
 def callback2(data,sh):
@@ -20,13 +20,15 @@ def callback2(data,sh):
         print("{} data from {}".format(data,sh.GPIO_PIN))
         count2+=1
         if count2 >= 20:
-            sh.cont = False 
+            sh.turnOff() 
 
 def thread_function(c):
     if c:
-        BaseSensorHandler("P1_35",ReadingType.INTERUPT,callback1)
+        s1 = BaseSensorHandler("P1_35",ReadingType.INTERUPT,callback1)
+        s1.run()
     else:
-        BaseSensorHandler("P1_36",ReadingType.INTERUPT,callback2)
+        s2 = BaseSensorHandler("P1_36",ReadingType.INTERUPT,callback2)
+        s2.run()
 
 t1 = Thread(target=thread_function,args=(True,))
 t2 = Thread(target=thread_function,args=(False,))
