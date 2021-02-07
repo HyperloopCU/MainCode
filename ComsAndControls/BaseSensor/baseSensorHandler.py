@@ -1,7 +1,7 @@
 from enum import Enum
 from sched import scheduler
 from time import time,sleep
-from random import randint
+from random import uniform,randint
 from Adafruit_BBIO import GPIO,ADC
 
 class ReadingType(Enum):
@@ -92,7 +92,10 @@ class BaseSensorHandler():
 
     
     def simulate(self):
-        rand = randint(self.simulateRange[0],self.simulateRange[1])  # Maybe I should add 2 decimal places or someting but it will prob just be 0,255 
+        if (self.simulateRange[0] == 0 and self.simulateRange[1] == 1) or (self.simulateRange[0] == 0 and self.simulateRange[1] == 255):
+            rand = randint(self.simulateRange[0],self.simulateRange[1])
+        else: 
+            rand = uniform(self.simulateRange[0],self.simulateRange[1])  # Maybe I should add 2 decimal places or someting but it will prob just be 0,255 
         self.callCallback(rand)
         self.timerCreater()
 
