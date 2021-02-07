@@ -60,9 +60,7 @@ class MultiInterruptHandler():
     def checkDifference(self):
         arr = [sensor.count for sensor in self.sensorsmaxDiff = -1
         n = len(arr)
-      
-        # Initialize max element from  
-        # right side 
+      # https://www.geeksforgeeks.org/maximum-difference-between-two-elements/
         maxRight = arr[n - 1]  
     
         for i in range(n - 2, -1, -1): 
