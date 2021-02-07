@@ -1,43 +1,16 @@
-from baseSensorHandler import BaseSensorHandler,ReadingType
-from threading import Thread,Lock
-count1 = 0
-lock = Lock()
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
+from baseInterruptHandler import MultiInterruptHandler
 
-def callback1(data,sh):
-    global lock
-    with lock:
-        global count1
-        print("{} data from {}".format(data,sh.GPIO_PIN))
-        count1+=1
-        if count1 >= 20:
-            sh.turnOff() 
 
-count2 = 0
-def callback2(data,sh):
-    global lock
-    with lock:
-        global count2
-        print("{} data from {}".format(data,sh.GPIO_PIN))
-        count2+=1
-        if count2 >= 20:
-            sh.turnOff() 
+multiINterrupts = MultiInterruptHandler(["P1_36","P1_35"],20,3,True)
 
-def thread_function(c):
-    if c:
-        s1 = BaseSensorHandler("P1_35",ReadingType.INTERUPT,callback1)
-        s1.run()
-    else:
-        s2 = BaseSensorHandler("P1_36",ReadingType.INTERUPT,callback2)
-        s2.run()
 
-t1 = Thread(target=thread_function,args=(True,))
-t2 = Thread(target=thread_function,args=(False,))
 
-t1.start()
-t2.start()
 
-t1.join()
-t2.join()
+
 
 
 
