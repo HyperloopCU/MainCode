@@ -1,5 +1,6 @@
 from baseSensorHandler import BaseSensorHandler,ReadingType
 from threading import Thread 
+from datetime import datetime,timedelta
 
 class BaseInterruptHandler:
     '''
@@ -22,10 +23,13 @@ class BaseInterruptHandler:
 
     
     def callback(self,data):
-        print("callback has run ")
+        # print("callback has run ")
+        if self.count == 0:
+            self.time = datetime.now()
         self.count += 1
-        if self.count >= 20:
+        if datetime.now() - timedelta(seconds=5) >= self.time:
             self.sensor_reader.turnOff()
+            print(self.count)
 
 
 class MultiInterruptHandlerHelper(BaseInterruptHandler):
@@ -35,11 +39,14 @@ class MultiInterruptHandlerHelper(BaseInterruptHandler):
     
 
     def callback(self,data):
-        print("callback has run ")
+        # print("callback has run ")
+        if self.count == 0:
+            self.time = datetime.now()
         self.count += 1
         self.parent_handler.checkDifference()
-        if self.count >= 20:
+        if datetime.now() - timedelta(seconds=5) >= self.time:
             self.sensor_reader.turnOff()
+            print(self.count)
 
             
     def setup(self):
@@ -53,10 +60,14 @@ class MultiInterruptHandler():
         self.simulate = simulate
         self.threshold = threshold
         self.sensors = [MultiInterruptHandlerHelper(self,PIN) for PIN in self.GPIO_PINS]
+        print("sensors created ")
         self.threads = [Thread(target=sensor.sensor_reader.run) for sensor in self.sensors]
+        print("threads made")
         for thread in self.threads:
             thread.start()
-            thread.join()
+            # thread.join()
+        # for thread in self.threads:
+        #     thread.join()
 
 
     def checkDifference(self):
@@ -76,9 +87,10 @@ class MultiInterruptHandler():
                     maxDiff = diff 
         
         if maxDiff >= self.threshold:
-            print("ESTOP")
-        else: 
-            print("Value is fine")
+            print("ESTOP {} and {}".format(arr[0],arr[1]))
+        # else: 
+        #     print("Value is fine {} and {}".format(arr[0],arr[1]))
+        #     print(datetime.now())
 
 
 

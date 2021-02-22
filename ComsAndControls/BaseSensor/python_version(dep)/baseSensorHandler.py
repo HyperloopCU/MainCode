@@ -72,6 +72,7 @@ class BaseSensorHandler():
         
     def interruptReader(self):
         if self.cont:
+            # print("waiting {}".format(self.GPIO_PIN))
             GPIO.wait_for_edge(self.GPIO_PIN, GPIO.RISING)
             self.callCallback(True)
             self.interruptReader()
