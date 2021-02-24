@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <list>
 
 using namespace std; 
 
@@ -29,7 +30,7 @@ class BaseSensorHandler {
         double checkAnalog(void);
     public:
         int count; 
-        int data; 
+        double data; 
         BaseSensorHandler(string GPIO_PIN,enum ReadingType readingType);
         void run(void);
 
@@ -46,9 +47,5 @@ class BaseAnalogHandler: public BaseSensorHandler {
         BaseAnalogHandler(string pin) : BaseSensorHandler(pin,ANALOG){  
         }
 };
-
-
-
-
 
 #endif
