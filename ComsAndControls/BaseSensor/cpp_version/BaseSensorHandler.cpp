@@ -70,7 +70,8 @@ double BaseSensorHandler::checkAnalog(void){
     getline(vFile,val);
     try{
         int res = stoi(val);
-        double mappedValue = (double)(map(res,2300,3890,0,18))/10.0; 
+        double mappedValue = (double)(map(res,50,4100,0,180))/100.00; 
+        //double mappedValue = res; 
         store(mappedValue);
         return mappedValue;  
     } catch (const invalid_argument& ia){
